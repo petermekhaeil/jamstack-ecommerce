@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ContextProviderComponent, SiteContext } from '../context/mainContext'
+import { CommerceProvider, useCommerce } from "nextjs-commerce-shopify"
 import { FaShoppingCart, FaCircle } from 'react-icons/fa';
 import Link from "next/link"
 import { colors } from '../theme'
@@ -10,7 +10,14 @@ function CartLink(props) {
   useEffect(() => {
     setRenderClientSideComponent(true)
   }, [])
-  let { context: { numberOfItemsInCart = 0 }} = props
+
+  const { checkout } = useCommerce()
+
+  const numberOfItemsInCart = checkout?.lineItems.reduce(
+    (count, item) => count + item.quantity,
+    0
+  )
+
   return (
     <div>
       <div className="fixed
@@ -35,13 +42,14 @@ function CartLink(props) {
 
 function CartLinkWithContext(props) {
   return (
-    <ContextProviderComponent>
-      <SiteContext.Consumer>
-        {
-          context => <CartLink {...props} context={context} />
-        }
-      </SiteContext.Consumer>
-    </ContextProviderComponent>
+    <CommerceProvider
+      config={{
+        domain: process.env.NEXT_PUBLIC_DOMAIN,
+        token: process.env.NEXT_PUBLIC_TOKEN,
+      }}
+    >
+      <CartLink {...props} />
+    </CommerceProvider>
   )
 }
 

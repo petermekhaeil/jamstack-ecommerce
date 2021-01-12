@@ -6,17 +6,23 @@ import QuantityPicker from '../../components/QuantityPicker'
 import { fetchInventory } from '../../utils/inventoryProvider'
 import { slugify } from '../../utils/helpers'
 import CartLink from '../../components/CartLink'
-import { SiteContext, ContextProviderComponent } from '../../context/mainContext'
+import { CommerceProvider, useAddItem } from "nextjs-commerce-shopify"
+import { toast } from "react-toastify"
 
 const ItemView = (props) => {
   const [numberOfitems, updateNumberOfItems] = useState(1)
   const { product } = props
   const { price, image, name, description } = product
-  const { context: { addToCart }} = props
+  const addItem = useAddItem()
 
-  function addItemToCart (product) {
-    product["quantity"] = numberOfitems
-    addToCart(product)
+  async function addItemToCart(product) {
+    await addItem({
+      variantId: product.id,
+      quantity: numberOfitems,
+    })
+    toast("Successfully added item to cart!", {
+      position: toast.POSITION.TOP_LEFT,
+    })
   }
 
   function increment() {
@@ -84,7 +90,7 @@ export async function getStaticPaths () {
 export async function getStaticProps ({ params }) {
   const name = params.name.replace(/-/g," ")
   const inventory = await fetchInventory()
-  const product = inventory.find(item => item.name.toLowerCase() === name)
+  const product = inventory.find(item => slugify(item.name) === slugify(name))
 
   return {
     props: {
@@ -95,13 +101,14 @@ export async function getStaticProps ({ params }) {
 
 function ItemViewWithContext(props) {
   return (
-    <ContextProviderComponent>
-      <SiteContext.Consumer>
-        {
-          context => <ItemView {...props} context={context} />
-        }
-      </SiteContext.Consumer>
-    </ContextProviderComponent>
+    <CommerceProvider
+      config={{
+        domain: process.env.NEXT_PUBLIC_DOMAIN,
+        token: process.env.NEXT_PUBLIC_TOKEN,
+      }}
+    >
+      <ItemView {...props} />
+    </CommerceProvider>
   )
 }
 

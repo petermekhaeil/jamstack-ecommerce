@@ -1,3 +1,7 @@
+## Shopify Integration
+
+This is a forked repository of [jamstack-cms/jamstack-ecommerce](https://github.com/jamstack-cms/jamstack-ecommerce) with Shopify integration using [nextjs-commerce-shopify](https://github.com/petermekhaeil/nextjs-commerce-shopify).
+
 ## Jamstack ECommerce Next
 
 Jamstack ECommerce Next provides a way to quickly get up and running with a fully configurable ECommerce site using Next.js.
